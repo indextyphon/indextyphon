@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
 论文查重程序
 用法：python main.py [原文文件] [抄袭版论文文件] [答案文件]
@@ -11,14 +10,6 @@
 import sys
 import re
 from collections import Counter
-
-
-def parse_args():
-    """解析命令行参数，返回 (原文路径, 抄袭版路径, 答案路径)"""
-    if len(sys.argv) != 4:
-        print("用法: python main.py <原文文件> <抄袭版论文文件> <答案文件>")
-        sys.exit(1)
-    return sys.argv[1], sys.argv[2], sys.argv[3]
 
 
 def read_file(file_path):
@@ -80,23 +71,35 @@ def cosine_similarity(counter1, counter2):
     return dot_product / (norm1 * norm2)
 
 
+def calc_similarity(orig_text, copy_text):
+    """计算两篇文本的重复率，保留两位小数"""
+    cleaned_orig = clean_text(orig_text)
+    cleaned_copy = clean_text(copy_text)
+    counter1 = get_bigram_counts(cleaned_orig)
+    counter2 = get_bigram_counts(cleaned_copy)
+    sim = cosine_similarity(counter1, counter2)
+    return round(sim, 2)
+
+
+def write_result(file_path, rate):
+    """将结果写入答案文件，保留两位小数"""
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(f"{rate:.2f}")
+
+
 def main():
-    orig_path, plag_path, ans_path = parse_args()
+    if len(sys.argv) != 4:
+        print("用法: python main.py <原文文件> <抄袭版论文文件> <答案文件>")
+        sys.exit(1)
 
-    orig_text = read_file(orig_path)
-    orig_clean = clean_text(orig_text)
-    orig_counter = get_bigram_counts(orig_clean)
+    orig_path = sys.argv[1]
+    copy_path = sys.argv[2]
+    ans_path = sys.argv[3]
 
-    plag_text = read_file(plag_path)
-    plag_clean = clean_text(plag_text)
-    plag_counter = get_bigram_counts(plag_clean)
-
-    similarity = cosine_similarity(orig_counter, plag_counter)
-
-    with open(ans_path, 'w', encoding='utf-8') as f:
-        f.write(f"{similarity:.2f}")
-
-    print(f"相似度: {similarity:.2f}")
+    orig = read_file(orig_path)
+    copy = read_file(copy_path)
+    rate = calc_similarity(orig, copy)
+    write_result(ans_path, rate)
 
 
 if __name__ == "__main__":
