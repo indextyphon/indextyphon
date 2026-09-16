@@ -1,0 +1,5 @@
+com\mathquiz\service\ServiceIntegrationTest.class
+com\mathquiz\parser\ExpressionParserTest.class
+com\mathquiz\model\FractionTest.class
+com\mathquiz\generator\ExpressionGeneratorTest.class
+com\mathquiz\model\BinaryExpressionTest.class
